@@ -1,0 +1,57 @@
+
+noAmbiguity(_, []).
+noAmbiguity(read(Input,_), [read(Input1,_) | T] ) :-
+      Input \== Input1, noAmbiguity(read(Input,_), T).
+
+dfa([]).
+dfa([ state(_, [H|T], _) | States ]) :- 
+	 noAmbiguity(H, T) , dfa(States).
+
+fa_state(Name, [ state(Name, [H|T], Answer) ], state(Name, [H|T], Answer)).
+fa_state(Name, [ state(Name, [H|T], Answer) | _ ], state(Name, [H|T], Answer)).
+fa_state(Name, [ state(Name1, [_], _) | States ], X) :-
+    Name \== Name1 ->   fa_state(Name, States, X);
+    fa_state(Name,States, X).
+    
+
+next_state(state(_, [read(A,B)|_], _), [A|T], B, T).
+next_state(state(_, [move(B) | _], _), List, B, List).
+next_state(state(_, [read(A, _)|T], _), [H1|T1], Answer, Leftover) :-
+	H1 \== A ->   next_state(state(_, T, _), [H1|T1], Answer, Leftover);
+        next_state(state(_, T, _), [H1|T1], Answer, Leftover).
+
+containsAccept([state(_, [_], yes) | _]).
+containsAccept([state(_, [_], X) | States]) :-
+    X \== yes, containsAccept(States).
+
+accept(state(_, [_], yes)).
+
+containsInput([read(A,_)|_], A).
+containsInput([read(Input,_)|Transitions], A):-
+    Input \== A ->   containsInput(Transitions, A).
+
+	
+accepts(state(_, [_], yes), [state(_, [_], yes)], []).
+accepts(state(_, [H|T], _), [H1|T1], [H2|T2]) :-
+    containsInput([H|T], H2), containsAccept([H1|T1]), 
+    accepts(state(_, [H|T], _), [H1|T1], T2).
+
+accepts([State|States], Input) :- accepts(State, [State|States], Input).
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

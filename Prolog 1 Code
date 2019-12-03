@@ -1,0 +1,49 @@
+:- use_module(library(clpfd)).
+
+tree(nil).
+
+tree(b(L,_,R)) :- 
+	tree(L), 
+	tree(R).
+
+mirror(nil, nil).
+
+mirror(b(L,M,R), b(R1,M,L1)) :- 
+	tree(b(L,M,R)),
+	mirror(L, L1),
+	mirror(R, R1).
+	
+echo([], []).
+
+echo([H1|T1],[H2|T2]) :-
+	is_list([H1|T1]),
+	H1 = H2,
+	[H|T] = T2,
+	H1 = H,
+	echo(T1, T).
+	
+unecho([], []).
+
+unecho([H1|T1],[H2|T2]) :-
+	is_list([H1|T1]),
+  (	H1=H2->  
+	unecho(T1, [H2|T2])
+	; unecho([H1|T1], T2)
+  ).
+
+unecho([],[_|T2]) :-
+	T2 = [].
+
+
+slist([]).
+slist([_]).
+slist([X,Y|Z]) :-
+	X @=< Y,
+	slist([Y|Z]).
+	
+
+sselect(X, [], [X]).
+sselect(X, [H|T], [X,H|T]) :-
+	X @< H.
+sselect(X, [H|T1], [H|T]) :-
+	sselect(X, T1, T).

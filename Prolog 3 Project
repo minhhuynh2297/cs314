@@ -1,0 +1,77 @@
+Homework 7
+==========
+
+Due Thursday, December 13
+Submit to Sakai by 3:00 AM December 14
+
+This assignment is optional. If you submit a solution for it, we will calculate
+your homework score using on your best six assignment grades.
+
+For this assignment, you will write a Prolog predicate that simulates finite
+automata, both deterministic and non-deterministic.
+
+
+The FA will be represented as a list of states. Each state is a compound term
+of the form state(Name, Transitions, Accept), where Name uniquely identifies
+the state, Transitions is a list of state transitions, and Accept indicates
+whether the state is an accept state.
+
+Transitions have the form read(Input, Name) and move(Name). These represent
+regular and null transitions, respectively.
+
+The values for Accept are 'yes' and 'no'.
+
+For example, a DFA that reads a string of 0s and 1s and accepts even integers
+can be written with two states:
+
+	[ state(even, [read(0, even), read(1, odd)], yes)
+	, state(odd,  [read(0, even), read(1, odd)], no)
+	]
+	
+If we wanted to complicate it needlessly, we could add a second non-accepting
+state and allow some non-deterministic transitions:
+
+	[ state(even,  [read(0, even), read(1, other)], yes)
+	, state(odd,   [read(0, even), read(1, odd), read(1, other)], no)
+	, state(other, [move(odd), read(0, even), read(1, other)], no)
+	]
+
+Create a file named "hw7.pl" and define in it the following predicates:
+
+dfa(++FA)
+	True when FA is deterministic, containing no null moves or ambiguous
+	transitions.
+
+fa_state(+Name, ++FA, -State)
+	Name is the name of a state
+	FA is the list of states
+	State is the state compound with the corresponding name
+
+next_state(++State, ++Input, -Name, -Leftover)
+	find the Name of the next state, given the current Input
+	
+	State is the current state
+	Input is the list of unconsumed inputs prior to transition
+	Name is the name of the next state
+	Leftover is the list of unconsumed inputs after transition
+
+accepts(+Start, ++FA, ++Input)
+	True if the FA reaches an accepting state after starting at state Start
+	and reading Inputs.
+
+accepts([State|States], Input) :- accepts(State, [State|States], Input).
+	This predicate provides a convenient interface to accepts/3
+
+
+An example of using accepts/2
+
+demo(String) :- 
+	accepts(
+		[ state(even, [read(0, even), read(1, odd)], yes)
+		, state(odd,  [read(0, even), read(1, odd)], no)
+		], String).
+
+?- demo([0,1,1,0]).
+true .
+?- demo([1,0,1]).
+false.

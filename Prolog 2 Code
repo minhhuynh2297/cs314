@@ -1,0 +1,15 @@
+:- use_module(library(clpfd)).
+
+
+path(Rel, Start, Target, [Start|T], N) :- 
+       (T = [Target], N is 2, call(Rel, Start, Target));
+    (call(Rel, Start, X),  path(Rel, X, Target, T, M, [Start])), N is M+1.
+
+path(Rel, Start, Target, [Start|T], N, List) :- 
+    (T = [Target], call(Rel, Start, Target), path(Rel, Start, Target, [Start, Target], N));
+    (call(Rel, Start, X), (noDupe(X, List), path(Rel, X, Target, T, M, [Start|List]))), N is M+1.
+
+	
+    
+noDupe(_,[]).
+noDupe(X, T) :- T = [H|Target], (X \== H -> noDupe(X, Target)).
